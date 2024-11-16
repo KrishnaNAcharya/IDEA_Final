@@ -3,14 +3,16 @@ import { addStudent } from "../api";
 
 const AddStudent = ({ onStudentAdded }) => {
     const [name, setName] = useState("");
-    const [email, setEmail] = useState("");
+    const [usn, setUsn] = useState("");
+    const [date, setDate] = useState("");
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await addStudent({ name, email });
+        await addStudent({ name, usn, date });
         onStudentAdded(); // Notify the parent to refresh the list
         setName("");
-        setEmail("");
+        setUsn("");
+        setDate("");
     };
 
     return (
@@ -26,13 +28,22 @@ const AddStudent = ({ onStudentAdded }) => {
                 />
             </div>
             <div>
-                <label className="block text-lg font-medium mb-2">Email:</label>
+                <label className="block text-lg font-medium mb-2">USN:</label>
                 <input
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
+                    type="text"
+                    value={usn}
+                    onChange={(e) => setUsn(e.target.value)}
                     className="input w-full px-4 py-2 border rounded-lg shadow-md"
-                    placeholder="Enter email"
+                    placeholder="Enter USN"
+                />
+            </div>
+            <div>
+                <label className="block text-lg font-medium mb-2">Date:</label>
+                <input
+                    type="date"
+                    value={date}
+                    onChange={(e) => setDate(e.target.value)}
+                    className="input w-full px-4 py-2 border rounded-lg shadow-md"
                 />
             </div>
             <button type="submit" className="btn bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md">

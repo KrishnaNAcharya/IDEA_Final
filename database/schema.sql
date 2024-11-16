@@ -1,0 +1,17 @@
+CREATE DATABASE IF NOT EXISTS teacher_dashboard;
+
+USE teacher_dashboard;
+
+CREATE TABLE IF NOT EXISTS students (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    name VARCHAR(255) NOT NULL,
+    usn VARCHAR(255) NOT NULL
+);
+
+CREATE TABLE IF NOT EXISTS attendance (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    student_id INT NOT NULL,
+    date DATE NOT NULL,
+    status VARCHAR(50) NOT NULL,
+    FOREIGN KEY (student_id) REFERENCES students(id) ON DELETE CASCADE
+);
