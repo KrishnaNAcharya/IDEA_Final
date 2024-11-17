@@ -19,4 +19,7 @@ export const markAttendance = (data) => api.post("/attendance", data);
 // Get attendance for a specific student
 export const getAttendance = (studentId) => api.get(`/attendance/${studentId}`);
 
+// Update student status
+export const updateStudentStatus = (id, status) => api.put(`/students/${id}/status`, { status });
+
 export default api;

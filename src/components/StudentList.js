@@ -1,6 +1,6 @@
 // src/components/StudentList.js
 import React, { useState, useEffect } from "react";
-import { getStudents, removeStudent } from "../api";
+import { getStudents, removeStudent, addStudent, updateStudentStatus } from "../api";
 import AddStudent from "./AddStudent";
 import { Link } from "react-router-dom";
 
@@ -28,6 +28,15 @@ const StudentList = () => {
         }
     };
 
+    const handleStatusChange = async (id, newStatus) => {
+        try {
+            await updateStudentStatus(id, newStatus);
+            fetchStudents();
+        } catch (error) {
+            console.error("Error updating status", error);
+        }
+    };
+
     useEffect(() => {
         fetchStudents();
     }, []);
@@ -41,13 +50,17 @@ const StudentList = () => {
                     <li key={student.id} className="flex justify-between items-center p-4 bg-white rounded-lg shadow-md">
                         <span className="text-lg font-medium">{student.name}</span>
                         <span className="text-lg font-medium">USN: {student.usn}</span>
-                        <span className="text-lg text-gray-600">Added on: {new Date(student.date).toLocaleDateString()}</span>
-                        <button
-                            onClick={() => handleRemove(student.id)}
-                            className="btn bg-red-500 text-white px-4 py-2 rounded-lg shadow-md"
-                        >
-                            Remove
-                        </button>
+                        <span className="text-lg text-gray-600">
+                            {new Date(student.date).toLocaleDateString()} - {student.status ? 'Present' : 'Absent'}
+                        </span>
+                        <div className="flex items-center gap-4">
+                            <button
+                                onClick={() => handleRemove(student.id)}
+                                className="btn bg-red-500 text-white px-4 py-2 rounded-lg shadow-md"
+                            >
+                                Remove
+                            </button>
+                        </div>
                     </li>
                 ))}
             </ul>

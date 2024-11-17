@@ -5,14 +5,16 @@ const AddStudent = ({ onStudentAdded }) => {
     const [name, setName] = useState("");
     const [usn, setUsn] = useState("");
     const [date, setDate] = useState("");
+    const [status, setStatus] = useState(true);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        await addStudent({ name, usn, date });
-        onStudentAdded(); // Notify the parent to refresh the list
+        await addStudent({ name, usn, date, status });
+        onStudentAdded();
         setName("");
         setUsn("");
         setDate("");
+        setStatus(true);
     };
 
     return (
@@ -25,6 +27,7 @@ const AddStudent = ({ onStudentAdded }) => {
                     onChange={(e) => setName(e.target.value)}
                     className="input w-full px-4 py-2 border rounded-lg shadow-md"
                     placeholder="Enter name"
+                    required
                 />
             </div>
             <div>
@@ -35,6 +38,7 @@ const AddStudent = ({ onStudentAdded }) => {
                     onChange={(e) => setUsn(e.target.value)}
                     className="input w-full px-4 py-2 border rounded-lg shadow-md"
                     placeholder="Enter USN"
+                    required
                 />
             </div>
             <div>
@@ -44,7 +48,17 @@ const AddStudent = ({ onStudentAdded }) => {
                     value={date}
                     onChange={(e) => setDate(e.target.value)}
                     className="input w-full px-4 py-2 border rounded-lg shadow-md"
+                    required
                 />
+            </div>
+            <div className="flex items-center gap-2">
+                <input
+                    type="checkbox"
+                    checked={status}
+                    onChange={(e) => setStatus(e.target.checked)}
+                    className="w-4 h-4"
+                />
+                <label className="text-lg">Present</label>
             </div>
             <button type="submit" className="btn bg-blue-500 text-white px-4 py-2 rounded-lg shadow-md">
                 Add Student

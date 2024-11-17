@@ -34,87 +34,87 @@ app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
 
 // Fetch all students
 app.get("/students", (req, res) => {
-    const sql = "SELECT * FROM students";
+    const sql = "SELECT * FROM students ORDER BY date DESC";
     db.query(sql, (err, results) => {
         if (err) {
             console.error("Error fetching students:", err);
             return res.status(500).send({ error: "Error fetching students", details: err });
         }
-        res.json(results);
+        res.json(results.map(student => ({
+            ...student,
+            status: Boolean(student.status)
+        })));
     });
 });
 
 // Add a student
 app.post("/students", (req, res) => {
-    const { name, usn } = req.body;
+    const { name, usn, date, status } = req.body;
 
-    if (!name || !usn) {
-        return res.status(400).send({ error: "Name and USN are required" });
+    if (!name || !usn || !date || status === undefined) {
+        return res.status(400).send({ error: "Name, USN, date and status are required" });
     }
 
-    const sql = "INSERT INTO students (name, usn) VALUES (?, ?)";
-    db.query(sql, [name, usn], (err, result) => {
+    const sql = "INSERT INTO students (name, usn, date, status) VALUES (?, ?, ?, ?)";
+    db.query(sql, [name, usn, date, status], (err, result) => {
         if (err) {
             console.error("Error adding student:", err);
             return res.status(500).send({ error: "Error adding student", details: err });
         }
-        res.status(201).send({ id: result.insertId, message: "Student added successfully" });
+        res.status(201).send({ message: "Student added successfully" });
     });
 });
 
-// Remove a student (and their attendance)
+// Remove a student by ID
 app.delete("/students/:id", (req, res) => {
     const { id } = req.params;
-
-    const deleteAttendanceSql = "DELETE FROM attendance WHERE student_id = ?";
-    db.query(deleteAttendanceSql, [id], (err) => {
+    const sql = "DELETE FROM students WHERE id = ?";
+    db.query(sql, [id], (err, result) => {
         if (err) {
-            console.error("Error removing attendance records:", err);
-            return res.status(500).send({ error: "Error removing attendance records", details: err });
+            console.error("Error removing student:", err);
+            return res.status(500).send({ error: "Error removing student", details: err });
         }
-
-        const deleteStudentSql = "DELETE FROM students WHERE id = ?";
-        db.query(deleteStudentSql, [id], (err, result) => {
-            if (err) {
-                console.error("Error removing student:", err);
-                return res.status(500).send({ error: "Error removing student", details: err });
-            }
-            if (result.affectedRows === 0) {
-                return res.status(404).send({ error: "Student not found" });
-            }
-            res.status(200).send({ message: "Student removed successfully" });
-        });
+        if (result.affectedRows === 0) {
+            return res.status(404).send({ error: "Student not found" });
+        }
+        res.status(200).send({ message: "Student removed successfully" });
     });
 });
 
-// Mark attendance
-app.post("/attendance", (req, res) => {
-    const { student_id, date, status } = req.body;
+// Remove a student by USN
+app.delete("/students/:usn", (req, res) => {
+    const { usn } = req.params;
+    const sql = "DELETE FROM students WHERE usn = ?";
+    db.query(sql, [usn], (err, result) => {
+        if (err) {
+            console.error("Error removing student:", err);
+            return res.status(500).send({ error: "Error removing student", details: err });
+        }
+        if (result.affectedRows === 0) {
+            return res.status(404).send({ error: "Student not found" });
+        }
+        res.status(200).send({ message: "Student removed successfully" });
+    });
+});
 
-    if (!student_id || !date || !status) {
-        return res.status(400).send({ error: "Student ID, date, and status are required" });
+// Update student status
+app.put("/students/:id/status", (req, res) => {
+    const { id } = req.params;
+    const { status } = req.body;
+
+    if (status === undefined) {
+        return res.status(400).send({ error: "Status is required" });
     }
 
-    const sql = "INSERT INTO attendance (student_id, date, status) VALUES (?, ?, ?)";
-    db.query(sql, [student_id, date, status], (err) => {
+    const sql = "UPDATE students SET status = ? WHERE id = ?";
+    db.query(sql, [status, id], (err, result) => {
         if (err) {
-            console.error("Error marking attendance:", err);
-            return res.status(500).send({ error: "Error marking attendance", details: err });
+            console.error("Error updating student status:", err);
+            return res.status(500).send({ error: "Error updating student status", details: err });
         }
-        res.status(201).send({ message: "Attendance marked successfully" });
-    });
-});
-
-// Get attendance for a specific student
-app.get("/attendance/:student_id", (req, res) => {
-    const { student_id } = req.params;
-
-    const sql = "SELECT * FROM attendance WHERE student_id = ? ORDER BY date DESC";
-    db.query(sql, [student_id], (err, results) => {
-        if (err) {
-            console.error("Error fetching attendance:", err);
-            return res.status(500).send({ error: "Error fetching attendance", details: err });
+        if (result.affectedRows === 0) {
+            return res.status(404).send({ error: "Student not found" });
         }
-        res.json(results);
+        res.status(200).send({ message: "Student status updated successfully" });
     });
 });
